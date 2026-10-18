@@ -65,6 +65,7 @@ class CocoMetric(BaseMetric):
             used for `Objects365V1Dataset`. Defaults to False.
         use_mp_eval (bool): Whether to use mul-processing evaluation
     """
+#iou_thrs: Optional[Union[float, Sequence[float]]] = None
     default_prefix: Optional[str] = 'coco'
 
     def __init__(self,
@@ -73,6 +74,7 @@ class CocoMetric(BaseMetric):
                  classwise: bool = False,
                  proposal_nums: Sequence[int] = (100, 300, 1000),
                  iou_thrs: Optional[Union[float, Sequence[float]]] = None,
+                 recall_iou_thrs = np.array([0.5]),
                  metric_items: Optional[Sequence[str]] = None,
                  format_only: bool = False,
                  outfile_prefix: Optional[str] = None,
@@ -81,7 +83,7 @@ class CocoMetric(BaseMetric):
                  collect_device: str = 'cpu',
                  prefix: Optional[str] = None,
                  sort_categories: bool = False,
-                 use_mp_eval: bool = False) -> None:
+                 use_mp_eval: bool = False) -> True:
         super().__init__(collect_device=collect_device, prefix=prefix)
         # coco evaluation metrics
         self.metrics = metric if isinstance(metric, list) else [metric]
@@ -105,6 +107,7 @@ class CocoMetric(BaseMetric):
             iou_thrs = np.linspace(
                 .5, 0.95, int(np.round((0.95 - .5) / .05)) + 1, endpoint=True)
         self.iou_thrs = iou_thrs
+        self.recall_iou_thrs = recall_iou_thrs
         self.metric_items = metric_items
         self.format_only = format_only
         if self.format_only:
@@ -439,6 +442,7 @@ class CocoMetric(BaseMetric):
                 log_msg = []
                 for i, num in enumerate(self.proposal_nums):
                     eval_results[f'AR@{num}'] = ar[i]
+                    #print(f'AR@{num}: {ar[i]}')
                     log_msg.append(f'\nAR@{num}\t{ar[i]:.4f}')
                 log_msg = ''.join(log_msg)
                 logger.info(log_msg)
@@ -466,6 +470,32 @@ class CocoMetric(BaseMetric):
                     'The testing results of the whole dataset is empty.')
                 break
 
+            if self.use_mp_eval:
+                coco_eval = COCOevalMP(self._coco_api, coco_dt, iou_type)
+            else:
+                coco_eval = COCOeval(self._coco_api, coco_dt, iou_type)
+
+
+            #Recall .5
+            coco_eval.params.catIds = self.cat_ids
+            coco_eval.params.imgIds = self.img_ids
+            coco_eval.params.maxDets = list(self.proposal_nums)
+            coco_eval.params.iouThrs = np.array([0.5])
+            coco_eval.evaluate()
+            coco_eval.accumulate()
+            coco_eval.summarize()
+            #Recall .75
+            coco_eval.params.catIds = self.cat_ids
+            coco_eval.params.imgIds = self.img_ids
+            coco_eval.params.maxDets = list(self.proposal_nums)
+            coco_eval.params.iouThrs = np.array([0.75])
+            coco_eval.evaluate()
+            coco_eval.accumulate()
+            coco_eval.summarize()
+
+            #Normal
+            del coco_eval
+            
             if self.use_mp_eval:
                 coco_eval = COCOevalMP(self._coco_api, coco_dt, iou_type)
             else:

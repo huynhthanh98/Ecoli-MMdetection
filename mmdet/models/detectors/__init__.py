@@ -5,6 +5,7 @@ from .base import BaseDetector
 from .base_detr import DetectionTransformer
 from .boxinst import BoxInst
 from .cascade_rcnn import CascadeRCNN
+from .cascade_rcnn_with_shared_aux import CascadeRCNNWithSharedAux
 from .centernet import CenterNet
 from .condinst import CondInst
 from .conditional_detr import ConditionalDETR
@@ -62,7 +63,7 @@ from .yolox import YOLOX
 __all__ = [
     'ATSS', 'BaseDetector', 'SingleStageDetector', 'TwoStageDetector', 'RPN',
     'KnowledgeDistillationSingleStageDetector', 'FastRCNN', 'FasterRCNN',
-    'MaskRCNN', 'CascadeRCNN', 'HybridTaskCascade', 'RetinaNet', 'FCOS',
+    'MaskRCNN', 'CascadeRCNN', 'CascadeRCNNWithSharedAux', 'HybridTaskCascade', 'RetinaNet', 'FCOS',
     'GridRCNN', 'MaskScoringRCNN', 'RepPointsDetector', 'FOVEA', 'FSAF',
     'NASFCOS', 'PointRend', 'GFL', 'CornerNet', 'PAA', 'YOLOV3', 'YOLACT',
     'VFNet', 'DETR', 'TridentFasterRCNN', 'SparseRCNN', 'SCNet', 'SOLO',

@@ -121,3 +121,18 @@ work_dirs/
 *.pth
 *.py~
 *.sh~
+
+# E. coli segmentation project: local data, logs and scratch copies
+coco/
+*.tiff
+Rag/
+test_ihim/2025*/
+75
+*.swp
+*.zip
+* copy.py
+* copy *.py
+* copy.md
+*(Copy)*
+*-Copy1.*
+Untitled*.ipynb
